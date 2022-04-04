@@ -3,8 +3,7 @@ package ru.job4j.pooh;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class QueueServiceTest {
 
@@ -35,7 +34,7 @@ public class QueueServiceTest {
         Resp result = queueService.process(
                 new Req("GET", "queue", "exchange", null)
         );
-        assertThat(result.text(), is(nullValue()));
+        assertThat(result.text(), is(""));
     }
 
     @Test
@@ -45,7 +44,7 @@ public class QueueServiceTest {
         Resp result = queueService.process(
                 new Req("GET", "queue", "weather", null)
         );
-        assertThat(result.text(), is(nullValue()));
+        assertThat(result.text(), is(""));
     }
 
     @Test
@@ -65,7 +64,7 @@ public class QueueServiceTest {
                 new Req("GET", "queue", "weather", null)
         );
         assertThat(result.text(), is("temperature=18"));
-        assertThat(result2.text(), is(nullValue()));
+        assertThat(result2.text(), is(""));
     }
 
     @Test

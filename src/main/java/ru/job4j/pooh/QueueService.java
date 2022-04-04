@@ -16,9 +16,8 @@ public class QueueService implements Service {
                 yield new Resp("", result ? "200" : "204");
             }
             case "GET" -> {
-                var getQueue = queue.get(name);
-                var text = getQueue != null ? getQueue.poll() : null;
-                yield new Resp(text, text != null ? "200" : "204");
+                var text = queue.getOrDefault(name, new ConcurrentLinkedQueue<>()).poll();
+                yield new Resp(text != null ? text : "", text != null ? "200" : "204");
             }
             default -> new Resp("", "501");
         };
