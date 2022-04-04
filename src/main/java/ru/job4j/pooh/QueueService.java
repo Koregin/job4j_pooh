@@ -8,15 +8,20 @@ public class QueueService implements Service {
 
     @Override
     public Resp process(Req req) {
-        String name = "weather";
-        queue.putIfAbsent(name, new ConcurrentLinkedQueue<>());
-        String text = "";
-        if ("POST".equals(req.httpRequestType())) {
-            queue.get(req.getSourceName()).add(req.getParam());
-        } else {
-            text = queue.get(name).poll();
-        }
-        return new Resp(text, text != null ? "200" : "204");
+        String name = req.getSourceName();
+        return switch (req.httpRequestType()) {
+            case "POST" -> {
+                queue.putIfAbsent(name, new ConcurrentLinkedQueue<>());
+                var result = queue.get(req.getSourceName()).add(req.getParam());
+                yield new Resp("", result ? "200" : "204");
+            }
+            case "GET" -> {
+                var getQueue = queue.get(name);
+                var text = getQueue != null ? getQueue.poll() : null;
+                yield new Resp(text, text != null ? "200" : "204");
+            }
+            default -> new Resp("", "501");
+        };
     }
 }
 

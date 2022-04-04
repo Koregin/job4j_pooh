@@ -24,6 +24,21 @@ public class QueueServiceTest {
     }
 
     @Test
+    public void whenPostThenGetNotExistQueue() {
+        QueueService queueService = new QueueService();
+        String paramForPostMethod = "temperature=18";
+        /* Добавляем данные в очередь weather. Режим queue */
+        Resp postResult = queueService.process(
+                new Req("POST", "queue", "weather", paramForPostMethod)
+        );
+        /* Забираем данные из очереди weather. Режим queue */
+        Resp result = queueService.process(
+                new Req("GET", "queue", "exchange", null)
+        );
+        assertThat(result.text(), is(nullValue()));
+    }
+
+    @Test
     public void whenGetQueueWithNoResult() {
         QueueService queueService = new QueueService();
         /* Забираем данные из очереди weather. Режим queue */
@@ -51,5 +66,16 @@ public class QueueServiceTest {
         );
         assertThat(result.text(), is("temperature=18"));
         assertThat(result2.text(), is(nullValue()));
+    }
+
+    @Test
+    public void whenPutInsteadPost() {
+        QueueService queueService = new QueueService();
+        String paramForPostMethod = "temperature=18";
+        /* Добавляем данные в очередь weather. Режим queue */
+        Resp putResult = queueService.process(
+                new Req("PUT", "queue", "weather", paramForPostMethod)
+        );
+        assertThat(putResult.status(), is("501"));
     }
 }

@@ -3,7 +3,7 @@ package ru.job4j.pooh;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class TopicServiceTest {
     @Test
@@ -31,5 +31,37 @@ public class TopicServiceTest {
         );
         assertThat(result1.text(), is("temperature=18"));
         assertThat(result2.text(), is(""));
+    }
+
+    @Test
+    public void whenTopicPutInsteadOfPost() {
+        TopicService topicService = new TopicService();
+        String paramForPublisher = "temperature=18";
+        String paramForSubscriber1 = "client407";
+        /* Режим topic. Подписываемся на топик weather. client407. */
+        topicService.process(
+                new Req("GET", "topic", "weather", paramForSubscriber1)
+        );
+        /* Режим topic. Добавляем данные в топик weather. */
+        Resp result = topicService.process(
+                new Req("PUT", "topic", "weather", paramForPublisher)
+        );
+        assertThat(result.status(), is("501"));
+    }
+
+    @Test
+    public void whenTopicNotExist() {
+        TopicService topicService = new TopicService();
+        String paramForPublisher = "temperature=18";
+        String paramForSubscriber1 = "client407";
+        /* Режим topic. Подписываемся на топик weather. client407. */
+        topicService.process(
+                new Req("GET", "topic", "weather", paramForSubscriber1)
+        );
+        /* Режим topic. Добавляем данные в топик weather. */
+        Resp result = topicService.process(
+                new Req("POST", "topic", "exchange", paramForPublisher)
+        );
+        assertThat(result.status(), is("200"));
     }
 }

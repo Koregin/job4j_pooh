@@ -8,19 +8,22 @@ public class TopicService implements Service {
 
     @Override
     public Resp process(Req req) {
-        String text = "";
-        if ("POST".equals(req.httpRequestType())) {
-            /*put param for all subscribers*/
-            topics.getOrDefault(req.getSourceName(), null)
-                    .forEach((id, queue) -> queue.add(req.getParam()));
-        }
-        if ("GET".equals(req.httpRequestType())) {
-            /*Add topic if absent*/
-            topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
-            /*Add subscriber with queue if absent*/
-            topics.get(req.getSourceName()).putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
-            text = topics.get(req.getSourceName()).get(req.getParam()).poll();
-        }
-        return new Resp(text != null ? text : "", text != null ? "200" : "204");
+        return switch (req.httpRequestType()) {
+            case "POST" -> {
+                var getTopic = topics.get(req.getSourceName());
+                if (getTopic != null) {
+                    getTopic.forEach((id, queue) -> queue.add(req.getParam()));
+                }
+                yield new Resp("", "200");
+            }
+            case "GET" -> {
+                topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
+                /*Add subscriber with queue if absent*/
+                topics.get(req.getSourceName()).putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
+                var text = topics.get(req.getSourceName()).get(req.getParam()).poll();
+                yield new Resp(text != null ? text : "", text != null ? "200" : "204");
+            }
+            default -> new Resp("", "501");
+        };
     }
 }
